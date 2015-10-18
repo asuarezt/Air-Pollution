@@ -1,12 +1,17 @@
-pollutantmean <- function(directory, pollutant, id = 1:332) {
-        data <- data.frame();
+corr <- function(directory, threshold = 0) {
         files <- list.files(directory, full.names = TRUE);
+        correlationList <- c();
+        index <- 1;
         
-        for (index in files) {
-                data <- rbind(data, read.csv(index, comment.char = ""))
+        while (index <= length(files)) {
+                completeCases <- complete(directory, index);
+                
+                if (completeCases$nobs > threshold) {
+                        data <- read.csv(files[index], comment.char = "");
+                        correlationList <- c(correlationList, cor(data$sulfate, data$nitrate, use = "complete.obs"));
+                }
+                index <- index + 1;
         }
         
-        neededMonitors <- subset(data, ID %in% id);
-        pollutantMean <- mean(neededMonitors[[pollutant]], na.rm = TRUE);
-        pollutantMean;
+        correlationList;
 }
